@@ -47,19 +47,16 @@
   .legend{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;font-family:var(--mono);font-size:10px;}
   .legend span{padding:3px 7px;border-radius:2px;}
   .badge{font-family:var(--mono);font-size:9px;padding:2px 5px;border-radius:2px;text-transform:uppercase;white-space:nowrap;display:inline-block;margin:2px 2px 2px 0;}
-  .badge.core_recoverable{background:var(--amber-dim);color:#f0c98a;}
-  .badge.core_asset_known_pool{background:#2f3d2a;color:#a9d68f;}
-  .badge.legacy_dead{background:#3a1f1f;color:#d18888;}
-  .badge.core_asset_other_pool{background:#2a2440;color:#b3a7e8;}
-  .badge.compressed{background:var(--line);color:var(--text-dim);}
-  .badge.unclassified{background:var(--line);color:var(--text-dim);}
-  .nft-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin:12px 0;}
-  .nft-card{background:var(--surface-2);border:1px solid var(--line);border-radius:3px;padding:10px;cursor:pointer;transition:border-color .2s;}
-  .nft-card:hover{border-color:var(--amber);}
-  .nft-card.selected{border-color:var(--amber);background:var(--line);}
-  .nft-name{font-family:var(--display);font-weight:700;font-size:11px;color:var(--text);margin-bottom:6px;word-break:break-all;}
-  .nft-meta{font-family:var(--mono);font-size:9px;color:var(--text-dim);margin-bottom:4px;}
-  .nft-mint{font-family:var(--mono);font-size:8px;color:var(--text-dim);word-break:break-all;opacity:.7;}
+  .badge.status-yes{background:#2f3d2a;color:#a9d68f;}
+  .badge.status-no{background:#3a1f1f;color:#d18888;}
+  .badge.status-unknown{background:#241a12;color:#d8b276;}
+  .nft-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin:12px 0;}
+  .nft-card{background:var(--surface-2);border:1px solid var(--line);border-radius:4px;overflow:hidden;}
+  .nft-thumb{width:100%;aspect-ratio:1/1;object-fit:cover;background:var(--line);display:block;}
+  .nft-body{padding:8px;}
+  .nft-name{font-family:var(--display);font-weight:700;font-size:11px;color:var(--text);margin-bottom:6px;word-break:break-word;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .nft-reason{font-family:var(--mono);font-size:9.5px;color:var(--text-dim);line-height:1.4;margin-top:5px;}
+  .nft-mint{font-family:var(--mono);font-size:8px;color:var(--text-dim);word-break:break-all;opacity:.6;margin-top:5px;}
   .summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:12px 0;}
   .summary-box{background:var(--surface-2);border:1px solid var(--line);border-radius:3px;padding:12px;text-align:center;}
   .summary-count{font-family:var(--display);font-weight:700;font-size:24px;color:var(--amber);}
@@ -74,7 +71,7 @@
 <div class="topbar">
   <div class="brand">
     <span class="mark">Comb</span>
-    <span class="sub">NFT Classifier — v1</span>
+    <span class="sub">NFT Classifier — v1.1</span>
   </div>
   <button class="home-btn" onclick="window.location='./index.html'">← Home</button>
 </div>
@@ -99,12 +96,9 @@
     <div class="card-head" onclick="toggleCard('card-results')"><span class="title">2 · Results</span><span class="status" id="status-results">not run</span></div>
     <div class="card-body">
       <div class="legend" style="margin-bottom:16px;">
-        <span class="badge core_recoverable">Core Recoverable</span>
-        <span class="badge core_asset_known_pool">Generations</span>
-        <span class="badge legacy_dead">Legacy (Dead)</span>
-        <span class="badge core_asset_other_pool">Other Pool</span>
-        <span class="badge compressed">Compressed</span>
-        <span class="badge unclassified">Unclassified</span>
+        <span class="badge status-yes">recoverable</span>
+        <span class="badge status-no">not recoverable</span>
+        <span class="badge status-unknown">can't tell yet</span>
       </div>
 
       <div id="summary-section" style="display:none;margin-bottom:16px;">
@@ -125,12 +119,10 @@
   <div class="card" id="card-info">
     <div class="card-head" onclick="toggleCard('card-info')"><span class="title">ℹ About Classification</span><span class="chev">▸</span></div>
     <div class="card-body">
-      <p class="help"><strong>Core Recoverable:</strong> Classic tokens frozen by new program. Unfreeze via token metadata delegate removal.</p>
-      <p class="help"><strong>Generations:</strong> mpl-core assets in known staking pool. Unfreeze via freeze_delegate plugin removal.</p>
-      <p class="help"><strong>Legacy (Dead):</strong> Frozen by deleted legacy program (bytecode = NULL on-chain). Cannot be recovered.</p>
-      <p class="help"><strong>Other Pool:</strong> Generations in unknown pool. May be recoverable but requires manual verification.</p>
-      <p class="help"><strong>Compressed:</strong> Compressed assets not currently supported for recovery.</p>
-      <p class="help"><strong>Unclassified:</strong> Unknown status. Requires manual investigation.</p>
+      <p class="help"><strong>Recoverable:</strong> held by the live Honeyland Core program (classic tokens) or the known active Generations staking pool. Can be unfrozen right now with the Recovery tool.</p>
+      <p class="help"><strong>Not recoverable:</strong> frozen by the old Honeyland program, which has been deleted on-chain (bytecode gone). No instruction exists that can unfreeze these - confirmed permanent, not fixable by any tool.</p>
+      <p class="help"><strong>Can't tell yet:</strong> a pool or delegate this tool doesn't recognize, a compressed asset (not supported yet), or a temporary lookup failure - not confirmed either way. Try rescanning if you see a lot of these.</p>
+      <p class="help">Each result also shows the underlying technical reason, and "Export as JSON" includes the raw category if you need it.</p>
     </div>
   </div>
 </main>
@@ -146,6 +138,19 @@ const PROGRAM_LEGACY_ID = "D7scofMhczWugX7WZPXSP3YjjSyDijEULpwQdraVj54q";
 const TOKEN_PROGRAM_ID = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA";
 const METADATA_PROGRAM_ID = "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s";
 const POOL_CORE = "4YSH4QNLjdpbDNWz6eJmT3J8kATvAWTrRMwpfE9zCDff";
+const ACTIONABLE = ['core_recoverable', 'core_asset_known_pool'];
+
+// Tiny inline placeholder shown when an NFT has no resolvable image.
+const PLACEHOLDER_IMG = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#34301F"/><text x="50" y="56" font-size="34" text-anchor="middle" fill="#948A73" font-family="monospace">?</text></svg>'
+);
+
+// Same question every user actually has: can this specific NFT be unstaked?
+function displayStatus(category) {
+  if (ACTIONABLE.includes(category)) return { label: 'recoverable', cls: 'status-yes' };
+  if (category === 'legacy_dead') return { label: 'not recoverable', cls: 'status-no' };
+  return { label: "can't tell yet", cls: 'status-unknown' };
+}
 
 let classificationResults = [];
 
@@ -179,9 +184,14 @@ async function rpc(method, params) {
   return json.result;
 }
 
+function imageFor(asset) {
+  return asset.content?.links?.image || asset.content?.files?.[0]?.cdn_uri || asset.content?.files?.[0]?.uri || PLACEHOLDER_IMG;
+}
+
 async function classifyNFT(asset) {
   const mint = asset.id;
   const name = asset.content?.metadata?.name || mint.slice(0, 8);
+  const image = imageFor(asset);
 
   if (asset.interface === 'MplCoreAsset') {
     const authority = asset.plugins?.freeze_delegate?.authority?.address;
@@ -189,21 +199,40 @@ async function classifyNFT(asset) {
 
     if (authority === POOL_CORE) {
       return {
-        mint, name, category: 'core_asset_known_pool', recoverable: true,
+        mint, name, image, category: 'core_asset_known_pool', recoverable: true,
         pool: POOL_CORE, collection, interface: 'MplCoreAsset',
         reason: 'Generations in known staking pool'
       };
-    } else {
+    }
+
+    // Not the known pool - but that doesn't mean it's alive. Check who
+    // actually owns that authority account before assuming it's unknown.
+    try {
+      const authInfo = await rpc('getMultipleAccounts', [[authority], { encoding: 'base64' }]);
+      const authOwner = authInfo.value[0]?.owner;
+      if (authOwner === PROGRAM_LEGACY_ID) {
+        return {
+          mint, name, image, category: 'legacy_dead', recoverable: false,
+          pool: authority, collection, interface: 'MplCoreAsset',
+          reason: 'Generations asset frozen by a pool PDA owned by the legacy program (now deleted, bytecode gone, unrecoverable)'
+        };
+      }
       return {
-        mint, name, category: 'core_asset_other_pool', recoverable: false,
-        pool: authority, collection, interface: 'MplCoreAsset',
-        reason: 'Generations in unknown pool'
+        mint, name, image, category: 'core_asset_other_pool', recoverable: false,
+        pool: authority, poolOwner: authOwner, collection, interface: 'MplCoreAsset',
+        reason: `Generations in unknown pool (owned by ${authOwner})`
+      };
+    } catch (err) {
+      return {
+        mint, name, image, category: 'core_asset_other_pool', recoverable: false,
+        pool: authority, collection, interface: 'MplCoreAsset', error: err.message,
+        reason: 'Generations in unknown pool (owner lookup failed)'
       };
     }
   }
 
   if (asset.compression?.compressed === true) {
-    return { mint, name, category: 'compressed', recoverable: false, reason: 'Compressed assets not supported' };
+    return { mint, name, image, category: 'compressed', recoverable: false, reason: 'Compressed assets not supported' };
   }
 
   if (!asset.compression?.compressed && asset.token_info?.associated_token_address) {
@@ -214,7 +243,7 @@ async function classifyNFT(asset) {
       const delegate = tokenInfo.value[0]?.data?.parsed?.info?.delegate;
 
       if (!delegate) {
-        return { mint, name, category: 'unclassified', recoverable: false, tokenAccount, reason: 'No freeze delegate' };
+        return { mint, name, image, category: 'unclassified', recoverable: false, tokenAccount, reason: 'No freeze delegate' };
       }
 
       const delegateInfo = await rpc('getMultipleAccounts', [[delegate], { encoding: 'base64' }]);
@@ -222,26 +251,26 @@ async function classifyNFT(asset) {
 
       if (owner === METADATA_PROGRAM_ID) {
         return {
-          mint, name, category: 'core_recoverable', recoverable: true, tokenAccount, delegate,
+          mint, name, image, category: 'core_recoverable', recoverable: true, tokenAccount, delegate,
           reason: 'Classic token frozen by new program'
         };
       } else if (owner === PROGRAM_LEGACY_ID) {
         return {
-          mint, name, category: 'legacy_dead', recoverable: false, tokenAccount, delegate,
+          mint, name, image, category: 'legacy_dead', recoverable: false, tokenAccount, delegate,
           reason: 'Frozen by deleted legacy program (bytecode gone, unrecoverable)'
         };
       } else {
         return {
-          mint, name, category: 'unclassified', recoverable: false, tokenAccount, delegate, delegateOwner: owner,
+          mint, name, image, category: 'unclassified', recoverable: false, tokenAccount, delegate, delegateOwner: owner,
           reason: 'Unknown delegate owner'
         };
       }
     } catch (err) {
-      return { mint, name, category: 'unclassified', recoverable: false, tokenAccount, error: err.message };
+      return { mint, name, image, category: 'unclassified', recoverable: false, tokenAccount, error: err.message };
     }
   }
 
-  return { mint, name, category: 'unclassified', recoverable: false, reason: 'Unknown type' };
+  return { mint, name, image, category: 'unclassified', recoverable: false, reason: 'Unknown type' };
 }
 
 async function classify() {
@@ -312,6 +341,23 @@ async function classify() {
 
     log('results-log', resultsText, false);
     document.getElementById('results-content').style.display = 'block';
+
+    const grid = document.getElementById('nft-grid');
+    grid.innerHTML = classificationResults.map(r => {
+      const { label, cls } = displayStatus(r.category);
+      return `
+        <div class="nft-card">
+          <img class="nft-thumb" src="${r.image || PLACEHOLDER_IMG}" loading="lazy" onerror="this.onerror=null;this.src='${PLACEHOLDER_IMG}';" alt="">
+          <div class="nft-body">
+            <div class="nft-name">${r.name}</div>
+            <span class="badge ${cls}">${label}</span>
+            <div class="nft-reason">${r.reason}</div>
+            <div class="nft-mint">${r.mint}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+    grid.style.display = classificationResults.length ? 'grid' : 'none';
 
     setStatus('status-results', `${classificationResults.length} classified`, 'ok');
     document.getElementById('card-results').classList.add('open');
